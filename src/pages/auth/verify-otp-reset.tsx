@@ -331,7 +331,7 @@ export default function VerifyOtpReset() {
                         variant="outline"
                         onClick={handleResendOtp}
                         disabled={resendLoading}
-                        className="text-xs sm:text-sm w-full sm:w-auto"
+                        className="text-xs sm:text-sm w-full sm:w-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         {resendLoading ? "Mengirim..." : "Kirim Ulang Kode"}
                       </Button>

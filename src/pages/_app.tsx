@@ -23,7 +23,7 @@ export default function App({
 }: AppProps) {
   return (
     <div className={cn(geistSans.variable, geistMono.variable)}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
         <SessionProvider session={session}>
           <ApiProvider>
             <Component {...pageProps} />

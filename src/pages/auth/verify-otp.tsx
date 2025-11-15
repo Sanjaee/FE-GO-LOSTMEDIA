@@ -474,7 +474,7 @@ export default function VerifyOtp() {
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => router.push("/register")}
+                    onClick={() => router.push("/auth/register")}
                     className="text-xs sm:text-sm text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 w-full sm:w-auto"
                   >
                     ← Kembali ke pendaftaran
