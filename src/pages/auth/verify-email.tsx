@@ -162,17 +162,17 @@ export default function VerifyEmail() {
 
   if (verified) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md mx-auto">
-          <Card className="w-full">
+          <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
             <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
               </div>
-              <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50">
                 Email Terverifikasi!
               </CardTitle>
-              <CardDescription className="text-sm sm:text-base text-gray-600">
+              <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Email Anda telah berhasil diverifikasi. Mengarahkan ke halaman utama...
               </CardDescription>
             </CardHeader>
@@ -183,29 +183,29 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mx-auto">
-        <Card className="w-full">
+        <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
               {loading ? (
-                <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
+                <Loader2 className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" />
               ) : (
-                <Mail className="w-6 h-6 text-blue-600" />
+                <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               )}
             </div>
-            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50">
               {isResetPassword
                 ? "Verifikasi Reset Password"
                 : "Verifikasi Email"}
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-gray-600">
+            <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {loading ? (
                 "Memverifikasi email Anda..."
               ) : userEmail ? (
                 <>
                   Memverifikasi email{" "}
-                  <span className="font-semibold text-blue-600 break-all">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 break-all">
                     {userEmail}
                   </span>
                 </>
@@ -217,7 +217,7 @@ export default function VerifyEmail() {
           <CardContent>
             {!token && (
               <div className="text-center">
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Token verifikasi tidak ditemukan.
                 </p>
                 <Button

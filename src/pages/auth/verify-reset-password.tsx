@@ -166,30 +166,30 @@ export default function VerifyResetPassword() {
 
   if (!email) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-pulse text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="animate-pulse text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mx-auto">
-        <Card className="w-full">
+        <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
-              <Lock className="w-6 h-6 text-green-600" />
+            <div className="mx-auto w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
+              <Lock className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50">
               Set Password Baru
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-gray-600">
+            <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               OTP telah diverifikasi untuk <br />
-              <span className="font-semibold text-blue-600 break-all">
+              <span className="font-semibold text-blue-600 dark:text-blue-400 break-all">
                 {email}
               </span>
               <br />
-              <span className="text-xs sm:text-sm text-gray-500 mt-2 block">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 block">
                 Masukkan password baru Anda
               </span>
             </CardDescription>
@@ -202,7 +202,7 @@ export default function VerifyResetPassword() {
                 <div className="grid gap-3">
                   <Label htmlFor="newPassword">Password Baru</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="newPassword"
                       type={showPassword ? "text" : "password"}
@@ -231,7 +231,7 @@ export default function VerifyResetPassword() {
                 <div className="grid gap-3">
                   <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
@@ -281,7 +281,7 @@ export default function VerifyResetPassword() {
                     type="button"
                     variant="ghost"
                     onClick={() => router.push("/auth/verify-otp-reset")}
-                    className="text-xs sm:text-sm text-gray-600 hover:text-gray-500 w-full sm:w-auto"
+                    className="text-xs sm:text-sm text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 w-full sm:w-auto"
                   >
                     ← Kembali ke verifikasi OTP
                   </Button>

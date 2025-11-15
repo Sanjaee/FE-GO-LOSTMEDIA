@@ -1,6 +1,6 @@
-import React from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, Settings, ShoppingBag } from "lucide-react";
+import { User, LogOut, Settings, ShoppingBag, Moon, Sun } from "lucide-react";
 
 export const Navbar = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { setTheme, resolvedTheme } = useTheme();
+
+  // Prevent hydration mismatch - resolvedTheme is undefined until mounted
+  const mounted = resolvedTheme !== undefined;
+
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -89,6 +94,25 @@ export const Navbar = () => {
 
           {/* Right side - Auth buttons or user menu */}
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="relative"
+              aria-label="Toggle theme"
+            >
+              {mounted ? (
+                resolvedTheme === "dark" ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )
+              ) : (
+                <div className="h-5 w-5" />
+              )}
+            </Button>
+
             {status === "loading" ? (
               <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
             ) : session ? (

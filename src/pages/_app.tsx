@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/toaster";
 import { ApiProvider } from "@/components/contex/ApiProvider";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -22,12 +23,14 @@ export default function App({
 }: AppProps) {
   return (
     <div className={cn(geistSans.variable, geistMono.variable)}>
-      <SessionProvider session={session}>
-        <ApiProvider>
-          <Component {...pageProps} />
-          <Toaster />
-        </ApiProvider>
-      </SessionProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <SessionProvider session={session}>
+          <ApiProvider>
+            <Component {...pageProps} />
+            <Toaster />
+          </ApiProvider>
+        </SessionProvider>
+      </ThemeProvider>
     </div>
   );
 }

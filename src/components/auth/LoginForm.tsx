@@ -279,12 +279,12 @@ export const LoginForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto dark:bg-gray-800 dark:border-gray-700">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold text-gray-900">
-          LostMedia
+        <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+          Lost Media
         </CardTitle>
-        <CardDescription className="text-gray-600">
+        <CardDescription className="text-gray-600 dark:text-gray-400">
           Masuk ke akun Anda
         </CardDescription>
       </CardHeader>
@@ -324,9 +324,9 @@ export const LoginForm = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
+                    <EyeOff className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
+                    <Eye className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
@@ -337,8 +337,8 @@ export const LoginForm = () => {
               <Button
                 type="button"
                 variant="link"
-                className="p-0 h-auto text-sm text-gray-600 hover:text-blue-600"
-                onClick={() => router.push("/reset-password")}
+                className="p-0 h-auto text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                onClick={() => router.push("/auth/reset-password")}
               >
                 Lupa password?
               </Button>
@@ -358,7 +358,7 @@ export const LoginForm = () => {
             <Separator className="w-full" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-muted-foreground">
+            <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">
               Atau lanjutkan dengan
             </span>
           </div>
@@ -368,7 +368,7 @@ export const LoginForm = () => {
         <Button
           type="button"
           variant="outline"
-          className="w-full"
+          className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
           onClick={handleGoogleSignIn}
           disabled={googleLoading || loading}
         >
@@ -399,12 +399,12 @@ export const LoginForm = () => {
 
         {/* Register Link */}
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Belum punya akun?{" "}
             <Button
               type="button"
               variant="link"
-              className="p-0 h-auto text-blue-600 hover:text-blue-500 font-medium"
+              className="p-0 h-auto text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
               onClick={() => router.push("/auth/register")}
             >
               Daftar di sini

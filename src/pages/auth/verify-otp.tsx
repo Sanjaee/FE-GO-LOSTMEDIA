@@ -346,28 +346,28 @@ export default function VerifyOtp() {
 
   if (!userEmail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-pulse text-gray-600">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="animate-pulse text-gray-600 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md mx-auto">
-        <Card className="w-full">
+        <Card className="w-full dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <Mail className="w-6 h-6 text-blue-600" />
+            <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
+              <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50">
               Verifikasi Email
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-gray-600">
+            <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {userEmail ? (
                 <>
                   OTP sudah dikirim ke{" "}
-                  <span className="font-semibold text-blue-600 break-all">
+                  <span className="font-semibold text-blue-600 dark:text-blue-400 break-all">
                     {userEmail}
                   </span>
                 </>
@@ -375,7 +375,7 @@ export default function VerifyOtp() {
                 "Kode verifikasi telah dikirim ke email Anda"
               )}
               <br />
-              <span className="text-xs sm:text-sm text-gray-500 mt-2 block">
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 block">
                 Verifikasi email diperlukan untuk mengakses akun Anda
               </span>
             </CardDescription>
@@ -406,7 +406,7 @@ export default function VerifyOtp() {
                       />
                     ))}
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-500 text-center flex items-center justify-center gap-2">
+                  <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center flex items-center justify-center gap-2">
                     {isVerifying && (
                       <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                     )}
@@ -417,12 +417,12 @@ export default function VerifyOtp() {
                     </span>
                   </div>
                   {otp.join("").length === 6 && !isVerifying && (
-                    <p className="text-xs text-blue-600 text-center">
+                    <p className="text-xs text-blue-600 dark:text-blue-400 text-center">
                       ✨ Kode akan diverifikasi secara otomatis
                     </p>
                   )}
                   {userEmail && (
-                    <p className="text-xs text-gray-500 text-center mt-2 px-2">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2 px-2">
                       Periksa folder spam jika email tidak ditemukan
                     </p>
                   )}
@@ -448,13 +448,13 @@ export default function VerifyOtp() {
                 <div className="text-center px-2">
                   {!canResend ? (
                     <div className="space-y-2">
-                      <p className="text-xs sm:text-sm text-gray-600">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                         Kirim ulang kode dalam {formatTime(timeLeft)}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="text-xs sm:text-sm text-gray-600">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                         Tidak menerima email?
                       </p>
                       <Button
@@ -475,7 +475,7 @@ export default function VerifyOtp() {
                     type="button"
                     variant="ghost"
                     onClick={() => router.push("/register")}
-                    className="text-xs sm:text-sm text-gray-600 hover:text-gray-500 w-full sm:w-auto"
+                    className="text-xs sm:text-sm text-gray-600 hover:text-gray-500 dark:text-gray-400 dark:hover:text-gray-300 w-full sm:w-auto"
                   >
                     ← Kembali ke pendaftaran
                   </Button>

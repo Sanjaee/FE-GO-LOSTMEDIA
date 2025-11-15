@@ -222,14 +222,14 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className={cn("flex flex-col gap-6")}>
-        <Card className="w-full max-w-md mx-auto">
+        <Card className="w-full max-w-md mx-auto dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-gray-900">
-              LostMedia
+            <CardTitle className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+              Lost Media
             </CardTitle>
-            <CardDescription className="text-gray-600">
+            <CardDescription className="text-gray-600 dark:text-gray-400">
               Buat akun baru untuk memulai
             </CardDescription>
           </CardHeader>
@@ -284,9 +284,9 @@ export default function Register() {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       )}
                     </button>
                   </div>
@@ -313,9 +313,9 @@ export default function Register() {
                       }
                     >
                       {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       )}
                     </button>
                   </div>
@@ -334,7 +334,7 @@ export default function Register() {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">
+                <span className="bg-white dark:bg-gray-800 px-2 text-muted-foreground">
                   Atau lanjutkan dengan
                 </span>
               </div>
@@ -344,7 +344,7 @@ export default function Register() {
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
               onClick={handleGoogleSignIn}
               disabled={googleLoading || loading}
             >
@@ -375,12 +375,12 @@ export default function Register() {
 
             {/* Login Link */}
             <div className="text-center mt-6">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Sudah punya akun?{" "}
                 <Button
                   type="button"
                   variant="link"
-                  className="p-0 h-auto text-blue-600 hover:text-blue-500 font-medium"
+                  className="p-0 h-auto text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                   onClick={() => router.push("/auth/login")}
                 >
                   Masuk di sini
