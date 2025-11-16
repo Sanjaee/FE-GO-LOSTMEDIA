@@ -123,6 +123,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
   };
 
   const handleComment = () => {
+    // Save scroll position before navigation
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+      sessionStorage.setItem("previousPath", router.asPath);
+    }
     router.push(`/share/${post.postId}`);
   };
 
@@ -228,7 +233,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                     alt={post.title}
                     className="w-full h-auto object-cover cursor-pointer"
                     style={{ maxHeight: "600px" }}
-                    onClick={() => setSelectedImageIndex(0)}
+                    onClick={() => {
+                      // Save scroll position before navigation
+                      if (typeof window !== "undefined") {
+                        sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                        sessionStorage.setItem("previousPath", router.asPath);
+                      }
+                      router.push(`/share/${post.postId}`);
+                    }}
                   />
                   {post.blurred && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -247,7 +259,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                     <div
                       key={idx}
                       className={`relative aspect-square bg-gray-200 dark:bg-gray-800 cursor-pointer ${idx === 0 && post.blurred ? "blur-sm" : ""}`}
-                      onClick={() => setSelectedImageIndex(idx)}
+                      onClick={() => {
+                        // Save scroll position before navigation
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                          sessionStorage.setItem("previousPath", router.asPath);
+                        }
+                        router.push(`/share/${post.postId}?image=${idx}`);
+                      }}
                     >
                       <img
                         src={img}
@@ -272,7 +291,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                   {/* Featured image - takes 2 columns */}
                   <div
                     className={`relative col-span-2 row-span-2 bg-gray-200 dark:bg-gray-800 cursor-pointer ${post.blurred ? "blur-sm" : ""}`}
-                    onClick={() => setSelectedImageIndex(0)}
+                    onClick={() => {
+                      // Save scroll position before navigation
+                      if (typeof window !== "undefined") {
+                        sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                        sessionStorage.setItem("previousPath", router.asPath);
+                      }
+                      router.push(`/share/${post.postId}`);
+                    }}
                   >
                     <img
                       src={featuredImage}
@@ -290,7 +316,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                     <div
                       key={idx + 1}
                       className="relative aspect-square bg-gray-200 dark:bg-gray-800 cursor-pointer"
-                      onClick={() => setSelectedImageIndex(idx + 1)}
+                      onClick={() => {
+                        // Save scroll position before navigation
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                          sessionStorage.setItem("previousPath", router.asPath);
+                        }
+                        router.push(`/share/${post.postId}?image=${idx + 1}`);
+                      }}
                     >
                       <img
                         src={img}
@@ -310,7 +343,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                   {/* Featured image on the left - takes 3 rows (larger) */}
                   <div
                     className={`relative col-span-2 row-span-3 bg-gray-200 dark:bg-gray-800 cursor-pointer ${post.blurred ? "blur-sm" : ""}`}
-                    onClick={() => setSelectedImageIndex(0)}
+                    onClick={() => {
+                      // Save scroll position before navigation
+                      if (typeof window !== "undefined") {
+                        sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                        sessionStorage.setItem("previousPath", router.asPath);
+                      }
+                      router.push(`/share/${post.postId}`);
+                    }}
                   >
                     <img
                       src={featuredImage}
@@ -329,7 +369,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                       <div
                         key={idx + 1}
                         className="relative aspect-square bg-gray-200 dark:bg-gray-800 cursor-pointer"
-                        onClick={() => setSelectedImageIndex(idx + 1)}
+                        onClick={() => {
+                        // Save scroll position before navigation
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                          sessionStorage.setItem("previousPath", router.asPath);
+                        }
+                        router.push(`/share/${post.postId}?image=${idx + 1}`);
+                      }}
                       >
                         <img
                           src={img}
@@ -368,7 +415,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
                     <div
                       key={idx + 1}
                       className="relative aspect-square bg-gray-200 dark:bg-gray-800 cursor-pointer"
-                      onClick={() => setSelectedImageIndex(idx + 1)}
+                      onClick={() => {
+                        // Save scroll position before navigation
+                        if (typeof window !== "undefined") {
+                          sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+                          sessionStorage.setItem("previousPath", router.asPath);
+                        }
+                        router.push(`/share/${post.postId}?image=${idx + 1}`);
+                      }}
                     >
                       <img
                         src={img}
@@ -486,12 +540,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
       <div className="px-4 border-t border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-4">
-            {likesCount > 0 && (
-              <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-                <span>{likesCount}</span>
-              </div>
-            )}
+           
             {post.commentsCount !== undefined && post.commentsCount > 0 && (
               <button
                 onClick={handleComment}
@@ -504,12 +553,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
               <span>{post.sharesCount} kali dibagikan</span>
             )}
           </div>
-          {post.viewsCount > 0 && (
-            <div className="flex items-center gap-1">
-              <Eye className="w-4 h-4" />
-              <span>{post.viewsCount}</span>
-            </div>
-          )}
+         
         </div>
       </div>
 

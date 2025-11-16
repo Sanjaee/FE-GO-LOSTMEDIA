@@ -63,8 +63,8 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
     }
   };
 
-  return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
+      return (
+        <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -166,7 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                         onCheckedChange={(checked) => {
                           setTheme(checked ? "dark" : "light");
                         }}
-                        className="ml-auto"
+                        className="ml-auto cursor-pointer"
                       />
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />

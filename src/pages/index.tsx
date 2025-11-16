@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/general/Navbar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -92,6 +93,37 @@ export default function Home() {
     loadPosts(true);
   }, []);
 
+  // Restore scroll position when returning from share page
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (typeof window !== "undefined" && router.asPath === "/") {
+        const scrollPosition = sessionStorage.getItem("scrollPosition");
+        const previousPath = sessionStorage.getItem("previousPath");
+        
+        // Only restore if we're coming from share page and on home page
+        if (scrollPosition && previousPath === "/") {
+          // Wait for posts to load, then restore scroll
+          if (!loading) {
+            setTimeout(() => {
+              window.scrollTo(0, parseInt(scrollPosition, 10));
+              // Clear stored values
+              sessionStorage.removeItem("scrollPosition");
+              sessionStorage.removeItem("previousPath");
+            }, 200);
+          }
+        }
+      }
+    };
+
+    // Check on mount and route change
+    handleRouteChange();
+    router.events.on("routeChangeComplete", handleRouteChange);
+    
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
+    };
+  }, [loading, router]);
+
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
       loadPosts(false);
@@ -130,8 +162,42 @@ export default function Home() {
 
         {/* Posts Feed */}
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-600 dark:text-gray-400" />
+          <div className="space-y-4">
+            {[...Array(3)].map((_, idx) => (
+              <div key={idx} className="bg-white dark:bg-[#18191A] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+                {/* Header Skeleton */}
+                <div className="p-4 pb-3">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-10 h-10 rounded-full" />
+                    <div className="flex-1">
+                      <Skeleton className="h-4 w-32 mb-2" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Content Skeleton */}
+                <div className="px-4 pb-3">
+                  <Skeleton className="h-5 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                
+                {/* Image Skeleton */}
+                <div className="w-full bg-gray-100 dark:bg-gray-900">
+                  <Skeleton className="w-full h-96" />
+                </div>
+                
+                {/* Actions Skeleton */}
+                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
+                  <div className="grid grid-cols-5 gap-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-full" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : !posts || posts.length === 0 ? (
           <div className="bg-white dark:bg-[#242526] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center">
