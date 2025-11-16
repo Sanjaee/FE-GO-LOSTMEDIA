@@ -114,9 +114,8 @@ export interface PostListResponse {
 
 export interface SearchPostsRequest {
   q: string;
-  category?: string;
-  page?: number;
   limit?: number;
+  offset?: number;
 }
 
 export interface Payment {
@@ -495,16 +494,56 @@ class ApiClient {
   async searchPosts(params: SearchPostsRequest): Promise<PostListResponse> {
     const queryParams = new URLSearchParams();
     queryParams.append("q", params.q);
-    if (params.category) queryParams.append("category", params.category);
-    if (params.page) queryParams.append("page", params.page.toString());
     if (params.limit) queryParams.append("limit", params.limit.toString());
+    if (params.offset !== undefined) queryParams.append("offset", params.offset.toString());
 
-    return this.request<PostListResponse>(
-      `/api/v1/posts/search?${queryParams.toString()}`,
+    const response = await this.request<{
+      success: boolean;
+      data: {
+        posts: Post[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+    }>(
+      `/api/v1/search/posts?${queryParams.toString()}`,
       {
         method: "GET",
       }
     );
+
+    // Transform response to PostListResponse format
+    // Backend returns: { success: true, data: { posts: [], total: 0, limit: 10, offset: 0 } }
+    // this.request already unwraps data.data, so response should be { posts: [], total: 0, ... }
+    // But handle both cases: unwrapped and wrapped
+    interface SearchResponseData {
+      posts?: Post[];
+      total?: number;
+      limit?: number;
+      offset?: number;
+      data?: SearchResponseData;
+    }
+    
+    const responseTyped = response as SearchResponseData;
+    let responseData: SearchResponseData = responseTyped;
+    
+    // If response has a data property, use it (in case unwrap didn't happen)
+    if (responseTyped.data && typeof responseTyped.data === 'object') {
+      responseData = responseTyped.data;
+    }
+    
+    const posts = responseData.posts || [];
+    const total = responseData.total || 0;
+    const limit = responseData.limit || 10;
+    const offset = responseData.offset || 0;
+
+    return {
+      posts: posts,
+      total: total,
+      page: limit > 0 ? Math.floor(offset / limit) + 1 : 1,
+      limit: limit,
+      hasMore: offset + limit < total,
+    };
   }
 
   async getPostsByCategory(

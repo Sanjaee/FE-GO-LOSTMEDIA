@@ -25,6 +25,7 @@ export default function VerifyOtp() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [lastVerificationTime, setLastVerificationTime] = useState(0);
   const [userEmail, setUserEmail] = useState("");
+  const [callbackUrl, setCallbackUrl] = useState<string>("/");
 
   // Countdown timer
   useEffect(() => {
@@ -38,10 +39,10 @@ export default function VerifyOtp() {
 
   // No initial countdown - user can resend immediately
 
-  // Get email from query params or session storage
+  // Get email and callbackUrl from query params or session storage
   useEffect(() => {
     if (router.isReady) {
-      const { email, token } = router.query;
+      const { email, token, callbackUrl } = router.query;
       
       // Check if we have token in query (email verification via link - legacy)
       if (token && typeof token === "string") {
@@ -50,8 +51,10 @@ export default function VerifyOtp() {
         return;
       }
 
-      // Get email from query params or session storage
+      // Get email and callbackUrl from query params or session storage
       const emailFromQuery = email as string;
+      const callbackUrlFromQuery = (callbackUrl as string) || "/";
+      setCallbackUrl(callbackUrlFromQuery);
       const emailFromStorage = sessionStorage.getItem("registration_email") || 
                               sessionStorage.getItem("reset_password_email");
 
@@ -89,13 +92,13 @@ export default function VerifyOtp() {
           description: "Akun Anda telah diverifikasi. Mengarahkan ke halaman utama...",
         });
         sessionStorage.removeItem("registration_email");
-        router.push("/");
+        router.push(callbackUrl);
       } else {
         toast({
           title: "⚠️ Verifikasi Berhasil",
           description: "Email berhasil diverifikasi. Silakan login untuk melanjutkan.",
         });
-        router.push("/auth/login");
+        router.push(`/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
       }
     } catch (error) {
       console.error("Email verification error:", error);
@@ -251,7 +254,7 @@ export default function VerifyOtp() {
             // Clear session storage
             sessionStorage.removeItem("registration_email");
             sessionStorage.removeItem("reset_password_email");
-            router.push("/");
+            router.push(callbackUrl);
           } else {
             toast({
               title: "⚠️ Verifikasi Berhasil",

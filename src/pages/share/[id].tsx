@@ -131,7 +131,8 @@ export default function SharePost() {
 
   const handleLike = async () => {
     if (!session?.accessToken) {
-      router.push("/auth/login");
+      const currentPath = router.asPath;
+      router.push(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
       return;
     }
 
@@ -205,7 +206,8 @@ export default function SharePost() {
   const handleSubmitComment = async () => {
     if (!commentText.trim() || !session?.accessToken) {
       if (!session?.accessToken) {
-        router.push("/auth/login");
+        const currentPath = router.asPath;
+        router.push(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
       }
       return;
     }
@@ -242,7 +244,7 @@ export default function SharePost() {
   if (loading) {
     return (
       <div className="h-screen bg-gray-100 dark:bg-[#18191A] overflow-hidden flex flex-col">
-        <Navbar enableSearch={false} />
+        <Navbar enableSearch={true} />
         <div className="relative flex-1 overflow-hidden">
           {/* Blurred Background Skeleton */}
           <div className="fixed inset-0 bg-gray-200 dark:bg-gray-800 blur-3xl opacity-30 -z-10" />
@@ -324,7 +326,7 @@ export default function SharePost() {
   if (!post) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-[#18191A]">
-        <Navbar enableSearch={false} />
+        <Navbar enableSearch={true} />
         <div className="flex items-center justify-center h-screen">
           <div className="text-center">
             <p className="text-gray-600 dark:text-gray-400">Post not found</p>
@@ -341,7 +343,7 @@ export default function SharePost() {
 
   return (
     <div className="h-screen bg-gray-100 dark:bg-[#18191A] overflow-hidden flex flex-col">
-      <Navbar enableSearch={false} />
+      <Navbar enableSearch={true} />
       
       {/* Main Content with Blur Background */}
       <div className="relative flex-1 overflow-hidden">
@@ -665,7 +667,10 @@ export default function SharePost() {
                           Silakan login untuk berkomentar
                         </p>
                         <Button
-                          onClick={() => router.push("/auth/login")}
+                          onClick={() => {
+                            const currentPath = router.asPath;
+                            router.push(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
+                          }}
                           size="sm"
                           variant="outline"
                         >

@@ -40,8 +40,8 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
     try {
       const response = await apiClient.searchPosts({
         q: query,
-        page: 1,
         limit: 10,
+        offset: 0,
       });
       setSearchResults(response.posts);
     } catch (error) {
@@ -70,10 +70,10 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
     return () => clearTimeout(timer);
   }, [searchQuery, open, performSearch]);
 
-  const handlePostClick = () => {
+  const handlePostClick = (postId: string) => {
     onOpenChange(false);
     onSearchQueryChange("");
-    router.push(`/`);
+    router.push(`/share/${postId}`);
   };
 
   const formatDate = (dateString: string) => {
@@ -125,7 +125,7 @@ export const SearchDialog: React.FC<SearchDialogProps> = ({
                 {searchResults.map((post) => (
                   <div
                     key={post.postId}
-                    onClick={handlePostClick}
+                    onClick={() => handlePostClick(post.postId)}
                     className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
                   >
                     <div className="flex items-start gap-3">

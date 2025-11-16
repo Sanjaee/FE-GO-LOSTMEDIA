@@ -134,7 +134,7 @@ export const LoginForm = () => {
           });
 
           sessionStorage.setItem("registration_email", error.user_email || formData.email);
-          router.push(`/auth/verify-otp?email=${encodeURIComponent(error.user_email || formData.email)}`);
+          router.push(`/auth/verify-otp?email=${encodeURIComponent(error.user_email || formData.email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`);
           return;
         }
 

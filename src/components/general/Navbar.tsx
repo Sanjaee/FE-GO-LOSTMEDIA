@@ -83,9 +83,9 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
 
           {/* Search Input - Desktop & Mobile */}
           {enableSearch && (
-            <div className="flex items-center flex-1 max-w-md mx-2 md:mx-4">
+            <div className="flex items-center flex-1 max-w-md mx-2 md:mx-4 min-w-0">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
                 <Input
                   type="text"
                   placeholder="Cari post..."
@@ -94,6 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                   onClick={handleSearchInputClick}
                   onFocus={handleSearchInputClick}
                   className="w-full pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 cursor-pointer text-sm md:text-base"
+                  readOnly
                 />
               </div>
             </div>
@@ -136,9 +137,9 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard" className="flex items-center w-full">
+                      <Link href="/profile" className="flex items-center w-full">
                         <User className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
+                        <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
