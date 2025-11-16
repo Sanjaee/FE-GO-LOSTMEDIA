@@ -1,80 +1,126 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/general/Navbar";
-import { useApi } from "@/components/contex/ApiProvider";
-import { Post } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Eye, Heart, Share2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import PostCard from "@/components/posts/PostCard";
+import { Post } from "@/lib/api-client";
+
+// Backend URL with fallback
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function Home() {
-  const { apiClient } = useApi();
   const { data: session } = useSession();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [page, setPage] = useState(1);
+  const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const limit = 20;
 
-  const loadPosts = useCallback(async (pageNum: number, reset: boolean = false) => {
+  // Helper function to get JWT token from session
+  const getJWTToken = () => {
+    if (session?.accessToken) {
+      return session.accessToken;
+    }
+    return null;
+  };
+
+  const loadPosts = useCallback(async (reset: boolean = false) => {
     try {
       if (reset) {
         setLoading(true);
+        setOffset(0);
       } else {
         setLoadingMore(true);
       }
 
-      const response = await apiClient.getPosts(pageNum, 20);
+      const currentOffset = reset ? 0 : offset;
+      const jwtToken = getJWTToken();
 
-      if (reset) {
-        setPosts(response.posts);
-      } else {
-        setPosts((prev) => [...prev, ...response.posts]);
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (jwtToken) {
+        headers.Authorization = `Bearer ${jwtToken}`;
       }
 
-      setHasMore(response.hasMore);
-      setPage(pageNum);
+      const response = await fetch(
+        `${BACKEND_URL}/api/v1/posts?limit=${limit}&offset=${currentOffset}`,
+        {
+          method: "GET",
+          headers,
+        }
+      );
+
+      const data = await response.json();
+      
+      // Backend returns { data: { success: true, posts: [...], total: ... } }
+      const postsData = (data.data?.posts || data.posts || []).map((post: any) => ({
+        ...post,
+        // Map author to user for compatibility
+        user: post.user || (post.author ? {
+          id: post.author.userId,
+          full_name: post.author.username,
+          username: post.author.username,
+          profile_photo: post.author.profilePic,
+          is_verified: false,
+        } : undefined),
+      }));
+      const total = data.data?.total || data.total || 0;
+
+      if (reset) {
+        setPosts(postsData);
+      } else {
+        setPosts((prev) => [...prev, ...postsData]);
+      }
+
+      setHasMore(postsData.length === limit && (currentOffset + limit) < total);
+      setOffset(currentOffset + postsData.length);
     } catch (error) {
       console.error("Error loading posts:", error);
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [apiClient]);
+  }, [offset, session]);
 
   useEffect(() => {
-    loadPosts(1, true);
-  }, [loadPosts]);
+    loadPosts(true);
+  }, []);
 
   const handleLoadMore = () => {
     if (!loadingMore && hasMore) {
-      loadPosts(page + 1, false);
+      loadPosts(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("id-ID", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
+  const handleLike = (postId: string) => {
+    // Update local state if needed
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.postId === postId
+          ? { ...post, likesCount: post.likesCount + 1 }
+          : post
+      )
+    );
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#18191A] font-sans">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      
+      {/* Main Container with max width */}
+      <div className="max-w-[680px] mx-auto px-4 py-4">
         {/* Create Post Button */}
         {session && (
-          <div className="mb-6">
+          <div className="mb-4">
             <Button
               onClick={() => router.push("/post")}
-              className="w-full sm:w-auto"
+              className="w-full bg-white dark:bg-[#242526] text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-[#2F3031] border border-gray-200 dark:border-gray-700 shadow-sm"
             >
               <Plus className="mr-2 h-4 w-4" />
               Buat Post Baru
@@ -82,111 +128,35 @@ export default function Home() {
           </div>
         )}
 
-        {/* Posts List */}
+        {/* Posts Feed */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gray-600 dark:text-gray-400" />
           </div>
         ) : !posts || posts.length === 0 ? (
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardContent className="pt-6 text-center py-12">
-              <p className="text-gray-600 dark:text-gray-400">
-                Belum ada post
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white dark:bg-[#242526] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              Belum ada post
+            </p>
+          </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {posts.map((post) => (
-              <Card
+              <PostCard
                 key={post.postId}
-                className="dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {post.user && (
-                          <>
-                            <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                              {post.user.profile_photo ? (
-                                <img
-                                  src={post.user.profile_photo}
-                                  alt={post.user.full_name}
-                                  className="w-10 h-10 rounded-full"
-                                />
-                              ) : (
-                                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                  {post.user.full_name?.charAt(0).toUpperCase() || "U"}
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900 dark:text-gray-100">
-                                {post.user.full_name || post.user.username || "User"}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {formatDate(post.createdAt)}
-          </p>
-        </div>
-                          </>
-                        )}
-                      </div>
-                      <CardTitle className="text-xl mt-2 dark:text-gray-50">{post.title}</CardTitle>
-                      {post.category && (
-                        <span className="inline-block mt-2 px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
-                          {post.category}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {post.description && (
-                    <CardDescription className="text-gray-700 dark:text-gray-300 mb-4">
-                      {post.description}
-                    </CardDescription>
-                  )}
-                  {post.content && (
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-4">
-                      {post.content}
-                    </p>
-                  )}
-                  {post.mediaUrl && (
-                    <div className="mb-4">
-                      <img
-                        src={post.mediaUrl}
-                        alt={post.title}
-                        className={`w-full rounded-lg ${post.blurred ? "blur-sm" : ""}`}
-                      />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{post.viewsCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Heart className="h-4 w-4" />
-                      <span>{post.likesCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Share2 className="h-4 w-4" />
-                      <span>{post.sharesCount}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                post={post}
+                onLike={handleLike}
+              />
             ))}
 
             {/* Load More Button */}
             {hasMore && (
-              <div className="flex justify-center py-6">
+              <div className="flex justify-center py-4">
                 <Button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
                   variant="outline"
-                  className="dark:bg-gray-800 dark:border-gray-700"
+                  className="bg-white dark:bg-[#242526] text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-[#2F3031] border border-gray-200 dark:border-gray-700"
                 >
                   {loadingMore ? (
                     <>
@@ -199,9 +169,9 @@ export default function Home() {
                 </Button>
               </div>
             )}
-        </div>
+          </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

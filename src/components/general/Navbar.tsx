@@ -140,7 +140,7 @@ export const Navbar = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onClick={handleSearchInputClick}
                 onFocus={handleSearchInputClick}
-                className="w-full pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
+                className="w-full pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100  cursor-pointer"
               />
             </div>
           </div>
@@ -170,13 +170,7 @@ export const Navbar = () => {
               <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
             ) : session ? (
               <div className="flex items-center space-x-4">
-                {/* Shopping Cart */}
-                <Button variant="ghost" size="sm" className="relative">
-                  <ShoppingBag className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    0
-                  </span>
-                </Button>
+              
 
                 {/* User Dropdown */}
                 <DropdownMenu>
