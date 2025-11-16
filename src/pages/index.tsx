@@ -111,7 +111,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#18191A] font-sans">
-      <Navbar />
+      <Navbar enableSearch={true} />
       
       {/* Main Container with max width */}
       <div className="max-w-[680px] mx-auto px-4 py-4">

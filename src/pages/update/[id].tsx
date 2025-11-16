@@ -879,7 +879,7 @@ const AdminUpdatePostPage: React.FC = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar enableSearch={false} />
       <div className="max-w-6xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Form Section */}
