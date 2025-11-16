@@ -203,6 +203,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user.id = token.sub as string;
       session.user.image = token.image as string;
+      session.user.role = token.userType as string; // Add role alias
+      session.user.username = session.user.name; // Add username alias
       session.accessToken = token.accessToken as string;
       session.refreshToken = token.refreshToken as string;
       session.isVerified = token.isVerified as boolean;

@@ -50,3 +50,13 @@ export const useAuth = () => {
     user: session?.user || null,
   };
 };
+
+// Hook to require authentication (redirects if not authenticated)
+export const useRequireAuth = (redirectTo: string = '/auth/login') => {
+  const { isUnauthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  if (!isLoading && isUnauthenticated) {
+    router.push(redirectTo);
+  }
+};

@@ -63,6 +63,62 @@ export interface OTPVerifyResponse {
   expires_in: number;
 }
 
+export interface Post {
+  postId: string;
+  userId: string;
+  title: string;
+  description?: string;
+  content?: string;
+  category: string;
+  mediaUrl?: string;
+  blurred: boolean;
+  viewsCount: number;
+  likesCount: number;
+  sharesCount: number;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  isPublished: boolean;
+  scheduledAt?: string;
+  isScheduled: boolean;
+  user?: User;
+}
+
+export interface CreatePostRequest {
+  title: string;
+  description?: string;
+  content?: string;
+  category: string;
+  mediaUrl?: string;
+  blurred?: boolean;
+  isPublished?: boolean;
+}
+
+export interface UpdatePostRequest {
+  title?: string;
+  description?: string;
+  content?: string;
+  category?: string;
+  mediaUrl?: string;
+  blurred?: boolean;
+  isPublished?: boolean;
+}
+
+export interface PostListResponse {
+  posts: Post[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export interface SearchPostsRequest {
+  q: string;
+  category?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface Payment {
   id: string;
   order_id: string;
@@ -396,6 +452,83 @@ class ApiClient {
       {
         method: "PUT",
         body: JSON.stringify(data),
+      }
+    );
+  }
+
+  // Post endpoints
+  async getPosts(page: number = 1, limit: number = 20): Promise<PostListResponse> {
+    return this.request<PostListResponse>(
+      `/api/v1/posts?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async getPost(postId: string): Promise<Post> {
+    return this.request<Post>(`/api/v1/posts/${postId}`, {
+      method: "GET",
+    });
+  }
+
+  async createPost(data: CreatePostRequest): Promise<Post> {
+    return this.request<Post>("/api/v1/posts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePost(postId: string, data: UpdatePostRequest): Promise<Post> {
+    return this.request<Post>(`/api/v1/posts/${postId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePost(postId: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/api/v1/posts/${postId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async searchPosts(params: SearchPostsRequest): Promise<PostListResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("q", params.q);
+    if (params.category) queryParams.append("category", params.category);
+    if (params.page) queryParams.append("page", params.page.toString());
+    if (params.limit) queryParams.append("limit", params.limit.toString());
+
+    return this.request<PostListResponse>(
+      `/api/v1/posts/search?${queryParams.toString()}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async getPostsByCategory(
+    category: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<PostListResponse> {
+    return this.request<PostListResponse>(
+      `/api/v1/posts/category/${category}?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
+      }
+    );
+  }
+
+  async getUserPosts(
+    userId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<PostListResponse> {
+    return this.request<PostListResponse>(
+      `/api/v1/users/${userId}/posts?page=${page}&limit=${limit}`,
+      {
+        method: "GET",
       }
     );
   }

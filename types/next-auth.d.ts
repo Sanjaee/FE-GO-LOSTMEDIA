@@ -6,8 +6,10 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string;
+      username?: string; // Alias for name
       image?: string;
       isVerified?: boolean;
+      role?: string; // Alias for userType
     };
     accessToken: string;
     refreshToken: string;
