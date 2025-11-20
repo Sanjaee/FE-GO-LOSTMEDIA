@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/general/Navbar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,15 +21,7 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const limit = 20;
 
-  // Helper function to get JWT token from session
-  const getJWTToken = () => {
-    if (session?.accessToken) {
-      return session.accessToken;
-    }
-    return null;
-  };
-
-  const loadPosts = useCallback(async (reset: boolean = false) => {
+  const loadPosts = async (reset: boolean = false) => {
     try {
       if (reset) {
         setLoading(true);
@@ -39,7 +31,7 @@ export default function Home() {
       }
 
       const currentOffset = reset ? 0 : offset;
-      const jwtToken = getJWTToken();
+      const jwtToken = session?.accessToken ?? null;
 
       const headers: HeadersInit = {
         "Content-Type": "application/json",
@@ -58,19 +50,65 @@ export default function Home() {
       );
 
       const data = await response.json();
-      
-      // Backend returns { data: { success: true, posts: [...], total: ... } }
-      const postsData = (data.data?.posts || data.posts || []).map((post: any) => ({
-        ...post,
-        // Map author to user for compatibility
-        user: post.user || (post.author ? {
-          id: post.author.userId,
-          full_name: post.author.username,
-          username: post.author.username,
-          profile_photo: post.author.profilePic,
-          is_verified: false,
-        } : undefined),
-      }));
+
+      // Bentuk author yang dikirim backend di dalam setiap post
+      interface AuthorPayload {
+        id: string;
+        username: string;
+        email?: string;
+        full_name?: string;
+        profile_photo?: string;
+        user_type?: string;
+        login_type?: string;
+        is_verified?: boolean;
+        created_at?: string;
+        userId?: string;
+        profilePic?: string;
+        isVerified?: boolean;
+      }
+
+      interface RawPostPayload extends Post {
+        author?: AuthorPayload;
+        [key: string]: unknown;
+      }
+
+      // Backend returns { data: { posts: [...], total: ... } }
+      const rawPosts = (data.data?.posts || data.posts || []) as RawPostPayload[];
+
+      const postsData = rawPosts.map((post) => {
+        const author = post.author;
+
+        // Normalisasi author dari backend
+        const normalizedAuthor = author
+          ? {
+              userId: author.userId || author.id,
+              username: author.username,
+              profilePic: author.profilePic || author.profile_photo,
+              isVerified: author.isVerified ?? author.is_verified,
+            }
+          : undefined;
+
+        return {
+          ...post,
+          author: normalizedAuthor,
+          // Map author ke user untuk kompatibilitas dengan PostCard / tipe User
+          user:
+            post.user ||
+            (author
+              ? {
+                  id: author.id,
+                  full_name: author.full_name || author.username,
+                  username: author.username,
+                  profile_photo: author.profile_photo,
+                  is_verified: author.is_verified,
+                  user_type: author.user_type,
+                  login_type: author.login_type,
+                  email: author.email,
+                  created_at: author.created_at,
+                }
+              : undefined),
+        };
+      });
       const total = data.data?.total || data.total || 0;
 
       if (reset) {
@@ -87,10 +125,12 @@ export default function Home() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [offset, session]);
+  };
 
   useEffect(() => {
+    // Initial load only once on mount
     loadPosts(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Restore scroll position when returning from share page

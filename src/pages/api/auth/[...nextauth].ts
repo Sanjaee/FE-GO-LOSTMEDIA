@@ -169,7 +169,7 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       // Initial sign in
       if (account && user) {
         return {
@@ -183,6 +183,35 @@ export const authOptions: NextAuthOptions = {
           image: user.image,
           accessTokenExpires: Date.now() + 15 * 60 * 1000, // 15 minutes
         };
+      }
+
+      // Handle session update trigger (when update() is called)
+      if (trigger === "update" && token.accessToken) {
+        try {
+          // Fetch updated user data from backend
+          const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+          const userResponse = await fetch(`${backendUrl}/api/v1/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token.accessToken}`,
+            },
+          });
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            const updatedUser = userData.data?.user || userData.user;
+            if (updatedUser) {
+              return {
+                ...token,
+                image: updatedUser.profile_photo || updatedUser.profilePic || token.image,
+                // Update name/username if changed
+                name: updatedUser.username || updatedUser.full_name || token.name,
+              };
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch updated user data:", error);
+          // Continue with existing token if fetch fails
+        }
       }
 
       // Return previous token if the access token has not expired yet
@@ -202,9 +231,10 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user.id = token.sub as string;
-      session.user.image = token.image as string;
+      session.user.image = (token.image as string) || session.user.image || "";
+      session.user.name = (token.name as string) || session.user.name || "";
       session.user.role = token.userType as string; // Add role alias
-      session.user.username = session.user.name; // Add username alias
+      session.user.username = (token.name as string) || session.user.name; // Add username alias
       session.accessToken = token.accessToken as string;
       session.refreshToken = token.refreshToken as string;
       session.isVerified = token.isVerified as boolean;

@@ -114,7 +114,23 @@ export default function SharePost() {
       if (response.ok) {
         const data = await response.json();
         const postData = data.data?.post || data.post;
-        setPost(postData);
+
+        // Normalisasi author agar cocok dengan komponen UI
+        const author = postData.author;
+        const normalizedAuthor = author
+          ? {
+              userId: author.userId || author.id,
+              username: author.username,
+              profilePic: author.profilePic || author.profile_photo,
+            }
+          : undefined;
+
+        const normalizedPost: PostWithSections = {
+          ...postData,
+          author: normalizedAuthor,
+        };
+
+        setPost(normalizedPost);
         setIsLiked(postData.isLiked || false);
         setLikesCount(postData.likesCount || 0);
         // Fetch comments if available
@@ -468,10 +484,10 @@ export default function SharePost() {
                   <div className="flex gap-3 mb-3">
                     {/* Profile Picture - Left */}
                     <div className="shrink-0">
-                      {(post.user?.profile_photo || post.author?.profilePic) ? (
+                      {(post.author?.profilePic || post.user?.profile_photo) ? (
                         <Image
-                          src={(post.user?.profile_photo || post.author?.profilePic) as string}
-                          alt={(post.user?.full_name || post.author?.username || "User") as string}
+                          src={(post.author?.profilePic || post.user?.profile_photo) as string}
+                          alt={(post.author?.username || post.user?.full_name || "User") as string}
                           width={40}
                           height={40}
                           className="w-10 h-10 rounded-full object-cover"

@@ -218,7 +218,7 @@ const AdminUpdatePostPage: React.FC = () => {
     }
   };
   const addImageDetail = (sectionIndex: number) => {
-    // Limit to 5 images for non-privileged roles, 30 for god role
+    // Sama seperti di post.tsx: batasi jumlah gambar dan update state aman
     const currentRole = session?.userType;
     const isPrivileged = isPrivilegedRole(currentRole);
     const isGod = currentRole === "god";
@@ -234,18 +234,20 @@ const AdminUpdatePostPage: React.FC = () => {
       return;
     }
 
-    const updatedSections = contentSections.map((section, i) => {
-      if (i === sectionIndex && section.type === "image") {
-        return {
-          ...section,
-          imageDetail: [...(section.imageDetail || []), ""],
-        };
-      }
-      return section;
-    });
-    setContentSections(updatedSections);
+    // Update sections
+    setContentSections((prevSections) =>
+      prevSections.map((section, i) => {
+        if (i === sectionIndex && section.type === "image") {
+          return {
+            ...section,
+            imageDetail: [...(section.imageDetail || []), ""],
+          };
+        }
+        return section;
+      })
+    );
 
-    // Update files and previews arrays
+    // Update files dan previews
     setContentSectionImageFiles((prevFiles) => {
       const newFiles = [...prevFiles];
       if (!newFiles[sectionIndex]) newFiles[sectionIndex] = [];
@@ -265,34 +267,37 @@ const AdminUpdatePostPage: React.FC = () => {
     imageIndex: number,
     value: string
   ) => {
-    const updatedSections = contentSections.map((section, i) => {
-      if (i === sectionIndex && section.type === "image") {
-        const newImageDetail = [...(section.imageDetail || [])];
-        newImageDetail[imageIndex] = value;
-        return {
-          ...section,
-          imageDetail: newImageDetail,
-        };
-      }
-      return section;
-    });
-    setContentSections(updatedSections);
+    setContentSections((prevSections) =>
+      prevSections.map((section, i) => {
+        if (i === sectionIndex && section.type === "image") {
+          const newImageDetail = [...(section.imageDetail || [])];
+          newImageDetail[imageIndex] = value;
+          return {
+            ...section,
+            imageDetail: newImageDetail,
+          };
+        }
+        return section;
+      })
+    );
   };
   const removeImageDetail = (sectionIndex: number, imageIndex: number) => {
-    const updatedSections = contentSections.map((section, i) => {
-      if (i === sectionIndex && section.type === "image") {
-        const newImageDetail =
-          section.imageDetail?.filter((_, idx) => idx !== imageIndex) || [];
-        return {
-          ...section,
-          imageDetail: newImageDetail,
-        };
-      }
-      return section;
-    });
-    setContentSections(updatedSections);
+    // Update sections
+    setContentSections((prevSections) =>
+      prevSections.map((section, i) => {
+        if (i === sectionIndex && section.type === "image") {
+          const newImageDetail =
+            section.imageDetail?.filter((_, idx) => idx !== imageIndex) || [];
+          return {
+            ...section,
+            imageDetail: newImageDetail,
+          };
+        }
+        return section;
+      })
+    );
 
-    // Update files and previews arrays
+    // Update files dan previews agar index tetap sinkron
     setContentSectionImageFiles((prevFiles) => {
       const newFiles = [...prevFiles];
       if (newFiles[sectionIndex]) {
@@ -1067,20 +1072,14 @@ const AdminUpdatePostPage: React.FC = () => {
               </div>
               {/* Content Sections */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col mb-4 space-y-2">
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                     Content Sections
                   </h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Untuk menambah gambar, gunakan tombol <b>Add Image</b> di dalam Image Section. Di sini hanya untuk menambah section teks / video / link.
+                  </p>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => addContentSection("image")}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <ImageIcon className="w-4 h-4 mr-1" />
-                      Image
-                    </Button>
                     <Button
                       type="button"
                       onClick={() => addContentSection("code")}

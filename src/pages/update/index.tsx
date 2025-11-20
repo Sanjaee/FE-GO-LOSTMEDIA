@@ -57,14 +57,14 @@ const UpdatePostListPage: React.FC = () => {
     setLoading(true);
     try {
       const jwtToken = getJWTToken();
-      if (!jwtToken) throw new Error("JWT token not available");
-      const res = await fetch(
-        `${BACKEND_URL}/api/v1/posts`,
-        {
-          headers: { Authorization: `Bearer ${jwtToken}` },
-          credentials: "include",
-        }
-      );
+      if (!jwtToken || !session?.user?.id) throw new Error("JWT token or user ID not available");
+      // Fetch hanya post milik user saat ini, backend akan filter dengan query userId
+      const ownerId = session.user.id;
+      const query = ownerId ? `?userId=${encodeURIComponent(ownerId)}` : "";
+      const res = await fetch(`${BACKEND_URL}/api/v1/posts${query}`, {
+        headers: { Authorization: `Bearer ${jwtToken}` },
+        credentials: "include",
+      });
       const data = await res.json();
       // Backend returns { data: { success: true, posts: [...], total: ... } }
       if (data.data?.success && data.data?.posts) {

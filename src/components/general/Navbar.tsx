@@ -18,6 +18,8 @@ import { Switch } from "@/components/ui/switch";
 import { User, LogOut, Settings, Moon, Sun, Search } from "lucide-react";
 import { SearchDialog } from "./SearchDialog";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+
 interface NavbarProps {
   enableSearch?: boolean;
 }
@@ -28,6 +30,16 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [profile, setProfile] = useState<{
+    id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    profilePhoto?: string;
+    isVerified: boolean;
+    userType: string;
+    loginType: string;
+  } | null>(null);
 
   // Prevent hydration mismatch - only render theme toggle after mount
   useEffect(() => {
@@ -36,6 +48,42 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
     });
     return () => cancelAnimationFrame(timer);
   }, []);
+
+  // Fetch profile from API so dropdown selalu pakai data server
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.accessToken) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        let user = data.data?.user || data.user;
+        if (!user && data.data && data.data.id) {
+          user = data.data;
+        }
+        if (user) {
+          setProfile({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            fullName: user.full_name || user.username,
+            profilePhoto: user.profile_photo,
+            isVerified: user.is_verified,
+            userType: user.user_type,
+            loginType: user.login_type,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch navbar profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [session?.accessToken]);
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/" });
@@ -115,11 +163,11 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                     >
                       <Avatar className="h-10 w-10">
                         <AvatarImage
-                          src={session.user?.image || ""}
-                          alt={session.user?.name || "User"}
+                          src={profile?.profilePhoto || session.user?.image || ""}
+                          alt={profile?.fullName || session.user?.name || "User"}
                         />
                         <AvatarFallback>
-                          {getInitials(session.user?.name || "User")}
+                          {getInitials(profile?.fullName || session.user?.name || "User")}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -128,10 +176,10 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {session.user?.name || "User"}
+                          {profile?.fullName || session.user?.name || "User"}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
-                          {session.user?.email || ""}
+                          {profile?.email || session.user?.email || ""}
                         </p>
                       </div>
                     </DropdownMenuLabel>
@@ -176,7 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                       className="cursor-pointer text-red-600 focus:text-red-600"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Sign In</span>
+                      <span>Logout</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

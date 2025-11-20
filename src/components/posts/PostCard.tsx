@@ -151,10 +151,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike }) => {
           <div className="flex items-center gap-3 flex-1">
             {/* Profile Picture */}
             <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 shrink-0">
-              {(post.user?.profile_photo || post.author?.profilePic) ? (
+              {(post.author?.profilePic || post.user?.profile_photo) ? (
                 <Image
-                  src={(post.user?.profile_photo || post.author?.profilePic) as string}
-                  alt={(post.user?.full_name || post.author?.username || "User") as string}
+                  src={(post.author?.profilePic || post.user?.profile_photo) as string}
+                  alt={(post.author?.username || post.user?.full_name || "User") as string}
                   width={40}
                   height={40}
                   className="w-full h-full object-cover"
