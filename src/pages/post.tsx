@@ -1431,7 +1431,7 @@ const Post: React.FC<{
                             file
                           );
                         }}
-                        className="w-full w-full h-10 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-10 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                       {contentSectionImagePreviews[index]?.[imageIndex] && (
                         <img
@@ -1529,9 +1529,22 @@ const Post: React.FC<{
       <Navbar enableSearch={false} />
       <main className="min-h-screen bg-white text-black">
         <div className="max-w-6xl mx-auto p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Form Section */}
-            <div className="space-y-6">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8">
+            {/* Preview Section - Di atas di mobile, kanan di desktop */}
+            <div className="space-y-6 order-1 lg:order-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Live Preview
+              </h2>
+              <div className="lg:sticky lg:top-6">
+                <BlogPostPreview
+                  postData={currentPostData}
+                  contentSectionImagePreviews={contentSectionImagePreviews}
+                />
+              </div>
+            </div>
+
+            {/* Form Section - Di bawah di mobile, kiri di desktop */}
+            <div className="space-y-6 order-2 lg:order-1">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {mode === "edit" ? "Edit Post" : "Create New Post"}
               </h1>
@@ -1891,19 +1904,6 @@ const Post: React.FC<{
                 </div>
               </form>
             </div>
-
-            {/* Preview Section */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Live Preview
-              </h2>
-              <div className="sticky top-6">
-                <BlogPostPreview
-                  postData={currentPostData}
-                  contentSectionImagePreviews={contentSectionImagePreviews}
-                />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1925,6 +1925,7 @@ const Post: React.FC<{
                   onClick={() => setShowSubmitModal(false)}
                   variant="outline"
                   disabled={confirmLoading}
+                  className="mb-4"
                 >
                   Cancel
                 </Button>
