@@ -57,35 +57,77 @@ const UpdatePostListPage: React.FC = () => {
     setLoading(true);
     try {
       const jwtToken = getJWTToken();
-      if (!jwtToken || !session?.user?.id) throw new Error("JWT token or user ID not available");
-      // Fetch hanya post milik user saat ini, backend akan filter dengan query userId
-      const ownerId = session.user.id;
-      const query = ownerId ? `?userId=${encodeURIComponent(ownerId)}` : "";
-      const res = await fetch(`${BACKEND_URL}/api/v1/posts${query}`, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-        credentials: "include",
-      });
-      const data = await res.json();
-      // Backend returns { data: { success: true, posts: [...], total: ... } }
-      if (data.data?.success && data.data?.posts) {
-        setPosts(data.data.posts);
-      } else if (data.data?.posts) {
-        // Alternative response format
-        setPosts(data.data.posts);
-      } else if (data.success && data.posts) {
-        // Direct response format
-        setPosts(data.posts);
-      }
-      else
+      if (!jwtToken || !session?.user?.id) {
         toast({
           title: "Error",
-          description: data.message || "Failed to fetch posts",
+          description: "JWT token or user ID not available",
           variant: "destructive",
         });
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch hanya post milik user saat ini
+      // Backend akan otomatis menggunakan userId dari JWT token (internal UUID)
+      // Query parameter digunakan sebagai trigger, tapi value diabaikan untuk security
+      // Backend akan menggunakan userId dari JWT token (UUID) bukan dari query param (Google ID)
+      const url = `${BACKEND_URL}/api/v1/posts?userId=${encodeURIComponent(session.user.id)}`;
+      
+      const res = await fetch(url, {
+        headers: { 
+          Authorization: `Bearer ${jwtToken}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      // Check response status
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || errorData.message || `HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      
+      // Debug: log response untuk troubleshooting
+      console.log("Fetch posts response:", data);
+      
+      // Backend returns { data: { success: true, posts: [...], total: ... } }
+      let posts = [];
+      if (data.data?.success && Array.isArray(data.data?.posts)) {
+        posts = data.data.posts;
+      } else if (Array.isArray(data.data?.posts)) {
+        // Alternative response format without success field
+        posts = data.data.posts;
+      } else if (data.success && Array.isArray(data.posts)) {
+        // Direct response format
+        posts = data.posts;
+      } else if (Array.isArray(data.posts)) {
+        // Direct posts array
+        posts = data.posts;
+      } else if (data.data && Array.isArray(data.data)) {
+        // Data is direct array
+        posts = data.data;
+      }
+      
+      if (Array.isArray(posts)) {
+        setPosts(posts);
+        if (posts.length === 0) {
+          console.log("No posts found for user");
+        }
+      } else {
+        console.error("Unexpected response format:", data);
+        toast({
+          title: "Error",
+          description: data.error?.message || data.message || "Failed to parse posts response",
+          variant: "destructive",
+        });
+      }
     } catch (e) {
+      console.error("Error fetching posts:", e);
       toast({
         title: "Error",
-        description: "Failed to fetch posts",
+        description: e instanceof Error ? e.message : "Failed to fetch posts",
         variant: "destructive",
       });
     } finally {

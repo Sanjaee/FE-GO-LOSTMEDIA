@@ -196,6 +196,13 @@ export const Navbar: React.FC<NavbarProps> = ({ enableSearch = true }) => {
                         <span>Profile Settings</span>
                       </Link>
                     </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild>
+                      <Link href="/update" className="flex items-center w-full">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Update</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {/* Dark Mode Toggle */}
                     <DropdownMenuItem
