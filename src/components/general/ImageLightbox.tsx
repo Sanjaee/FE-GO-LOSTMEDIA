@@ -20,6 +20,7 @@ interface ImageLightboxProps {
   onClose?: () => void;
   onNext?: () => void;
   onPrev?: () => void;
+  open?: boolean; // Control lightbox from outside
 }
 
 const ImageLightbox: React.FC<ImageLightboxProps> = ({
@@ -34,8 +35,11 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
   onClose,
   onNext,
   onPrev,
+  open,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const isControlled = open !== undefined;
+  const lightboxOpen = isControlled ? open : isOpen;
 
   // Handle single image
   if (src && !images) {
@@ -57,8 +61,14 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
         </div>
 
         <Lightbox
-          open={isOpen}
-          close={() => setIsOpen(false)}
+          open={lightboxOpen}
+          close={() => {
+            if (isControlled) {
+              onClose?.();
+            } else {
+              setIsOpen(false);
+            }
+          }}
           slides={[{ src, width: 1920, height: 1080 }]}
           plugins={[Zoom]}
           zoom={{
@@ -91,10 +101,14 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
 
     return (
       <Lightbox
-        open={isOpen}
+        open={lightboxOpen}
         close={() => {
-          setIsOpen(false);
-          onClose?.();
+          if (isControlled) {
+            onClose?.();
+          } else {
+            setIsOpen(false);
+            onClose?.();
+          }
         }}
         slides={slides}
         index={currentIndex}

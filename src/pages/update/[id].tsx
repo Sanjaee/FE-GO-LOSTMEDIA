@@ -22,9 +22,7 @@ import { toast } from "@/hooks/use-toast";
 
 import { DateTimePicker } from "@/components/general/DateTimePicker";
 import ImageLightbox from "@/components/general/ImageLightbox";
-import Lightbox from "yet-another-react-lightbox";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import "yet-another-react-lightbox/styles.css";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -87,10 +85,9 @@ const AdminUpdatePostPage: React.FC = () => {
   const [contentSectionImagePreviews, setContentSectionImagePreviews] =
     useState<string[][]>([]);
 
-  // State for image lightbox
-  const [showGallery, setShowGallery] = useState(false);
-  const [galleryImages, setGalleryImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // State for image lightbox - per section
+  const [showGallery, setShowGallery] = useState<{ [key: number]: boolean }>({});
+  const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: number]: number }>({});
 
   // Helper function to get JWT token from session
   const getJWTToken = () => {
@@ -199,17 +196,38 @@ const AdminUpdatePostPage: React.FC = () => {
 
   // Content section handlers (same as post.tsx)
   const addContentSection = (type: ContentSection["type"]) => {
-    const newSection: ContentSection = {
-      type,
-      content: type === "code" || type === "html" ? "" : undefined,
-      src:
-        type === "image" || type === "video" || type === "link"
-          ? ""
-          : undefined,
-      imageDetail: type === "image" ? [""] : undefined,
-      order: contentSections.length,
-    };
-    setContentSections([...contentSections, newSection]);
+    // Check if section type already exists
+    if (contentSections.some((section) => section.type === type)) {
+      const typeNames = {
+        image: "Image",
+        code: "Copy Text",
+        video: "Video",
+        link: "Link",
+        html: "HTML",
+      };
+
+      toast({
+        title: "Limit reached",
+        description: `Only one ${typeNames[type]} Section is allowed.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add the new section
+    setContentSections((prevSections) => [
+      ...prevSections,
+      {
+        type,
+        content: type === "code" || type === "html" ? "" : undefined,
+        src:
+          type === "image" || type === "video" || type === "link"
+            ? ""
+            : undefined,
+        imageDetail: type === "image" ? [""] : undefined, // Initialize with one empty URL for images
+        order: contentSections.length,
+      },
+    ]);
 
     // If it's an image section, also add corresponding arrays for files and previews
     if (type === "image") {
@@ -728,25 +746,15 @@ const AdminUpdatePostPage: React.FC = () => {
         )}
         {section.type === "image" && (
           <div className="space-y-4">
+            {/* Additional images */}
             <div>
-              <div className="mb-2">
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                  Additional Images (
-                  {(() => {
-                    const existingImages =
-                      section.imageDetail?.filter(
-                        (url) => url && url.trim() !== ""
-                      ).length || 0;
-                    const newImages =
-                      contentSectionImageFiles[index]?.filter(
-                        (file) => file !== null
-                      ).length || 0;
-                    return existingImages + newImages;
-                  })()}
-                  ):
-                </span>
-              </div>
               <div className="flex justify-between items-center mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Additional Images (
+                  {section.imageDetail?.filter((url) => url.trim() !== "")
+                    .length || 0}
+                  )
+                </label>
                 <Button
                   type="button"
                   onClick={() => addImageDetail(index)}
@@ -760,54 +768,14 @@ const AdminUpdatePostPage: React.FC = () => {
                 </Button>
               </div>
               <div className="space-y-2">
-                {(() => {
-                  // Get existing images from section.imageDetail
-                  const existingImages = section.imageDetail || [];
-
-                  // Get new images from contentSectionImageFiles
-                  const newImages = contentSectionImageFiles[index] || [];
-
-                  // Combine all images for display
-                  type ImageItem = {
-                    url: string;
-                    index: number;
-                    isExisting: boolean;
-                    imageIndex: number;
-                  };
-
-                  const allImages: ImageItem[] = [];
-
-                  // Add existing images
-                  existingImages.forEach((imageUrl, idx) => {
-                    allImages.push({
-                      url: imageUrl,
-                      index: idx,
-                      isExisting: true,
-                      imageIndex: idx,
-                    });
-                  });
-
-                  // Add new images
-                  newImages.forEach((file, idx) => {
-                    if (file) {
-                      allImages.push({
-                        url: contentSectionImagePreviews[index]?.[idx] || "",
-                        index: existingImages.length + idx,
-                        isExisting: false,
-                        imageIndex: idx,
-                      });
-                    }
-                  });
-
-                  return allImages.map((image, displayIndex) => (
+                {section.imageDetail &&
+                  section.imageDetail.map((_, imageIndex) => (
                     <div
-                      key={`${image.isExisting ? "existing" : "new"}-${
-                        image.imageIndex
-                      }`}
-                      className="flex gap-2 items-center"
+                      key={imageIndex}
+                      className="flex flex-row items-center gap-2 p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
                     >
-                      <span className="text-sm text-gray-500 w-8 text-center">
-                        {displayIndex + 1}.
+                      <span className="text-sm text-gray-500 w-8 text-center mb-1 md:mb-0 md:w-8">
+                        {imageIndex + 1}.
                       </span>
                       <input
                         type="file"
@@ -816,53 +784,46 @@ const AdminUpdatePostPage: React.FC = () => {
                           const file = e.target.files?.[0] || null;
                           handleContentSectionImageChange(
                             index,
-                            image.imageIndex,
+                            imageIndex,
                             file
                           );
                         }}
-                        className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full h-10 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                      {image.url && (
-                        <ImageLightbox
-                          width={64}
-                          height={64}
-                          src={image.url}
-                          alt={`Preview ${displayIndex + 1}`}
-                          className="w-16 h-16 object-cover rounded border border-gray-300 dark:border-gray-600 shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+                      {contentSectionImagePreviews[index]?.[imageIndex] && (
+                        <img
+                          src={contentSectionImagePreviews[index][imageIndex]}
+                          alt={`Preview ${imageIndex + 1}`}
+                          className="w-16 h-16 object-cover rounded border border-gray-300 dark:border-gray-600 shrink-0"
                         />
                       )}
+                      {!contentSectionImagePreviews[index]?.[imageIndex] &&
+                        section.imageDetail?.[imageIndex] &&
+                        section.imageDetail[imageIndex].trim() !== "" && (
+                          <img
+                            src={section.imageDetail[imageIndex]}
+                            alt={`Image ${imageIndex + 1}`}
+                            className="w-16 h-16 object-cover rounded border border-gray-300 dark:border-gray-600 shrink-0"
+                          />
+                        )}
                       <Button
                         type="button"
-                        onClick={() =>
-                          removeImageDetail(index, image.imageIndex)
-                        }
+                        onClick={() => removeImageDetail(index, imageIndex)}
                         variant="outline"
                         size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
                         title="Remove image"
                       >
                         <X className="w-4 h-4" />
                       </Button>
                     </div>
-                  ));
-                })()}
+                  ))}
               </div>
-              {(() => {
-                const existingImages = section.imageDetail || [];
-                const newImages = contentSectionImageFiles[index] || [];
-                const hasExistingImages = existingImages.length > 0;
-                const hasNewImages = newImages.some((file) => file !== null);
-
-                if (!hasExistingImages && !hasNewImages) {
-                  return (
-                    <div className="text-center py-4 text-gray-500 text-sm border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-                      No additional images added yet. Click &quot;Add Image&quot; to
-                      start.
-                    </div>
-                  );
-                }
-                return null;
-              })()}
+              {(!section.imageDetail || section.imageDetail.length === 0) && (
+                <div className="text-center py-4 text-gray-500 text-sm border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                  No additional images added yet. Click &quot;Add Image&quot; to start.
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1076,10 +1037,16 @@ const AdminUpdatePostPage: React.FC = () => {
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                     Content Sections
                   </h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Untuk menambah gambar, gunakan tombol <b>Add Image</b> di dalam Image Section. Di sini hanya untuk menambah section teks / video / link.
-                  </p>
                   <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => addContentSection("image")}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-1" />
+                      Image
+                    </Button>
                     <Button
                       type="button"
                       onClick={() => addContentSection("code")}
@@ -1102,7 +1069,7 @@ const AdminUpdatePostPage: React.FC = () => {
                       variant="outline"
                       size="sm"
                     >
-                      + Description
+                      + Link
                     </Button>
                     <Button
                       type="button"
@@ -1110,7 +1077,7 @@ const AdminUpdatePostPage: React.FC = () => {
                       variant="outline"
                       size="sm"
                     >
-                      + HTML
+                      + Description
                     </Button>
                   </div>
                 </div>
@@ -1180,125 +1147,67 @@ const AdminUpdatePostPage: React.FC = () => {
                     .sort((a, b) => a.order - b.order)
                     .map((section, index) => {
                       if (section.type === "image") {
+                        // Use preview images if available, else fallback to imageDetail URLs
+                        const previews = contentSectionImagePreviews?.[index] || [];
+                        const existingImages = (section.imageDetail || []).map((url, idx) =>
+                          previews[idx] && previews[idx].length > 0 ? previews[idx] : url
+                        ).filter(url => url && url.trim() !== "");
+                        
+                        // Get new uploaded images from previews
+                        const newImages = (contentSectionImagePreviews[index] || [])
+                          .slice(existingImages.length)
+                          .filter(url => url && url.trim() !== "");
+                        
+                        const imageUrls = [...existingImages, ...newImages];
+                        if (imageUrls.length === 0) return null;
                         return (
                           <div key={index} className="mb-4">
-                            {/* Main image */}
-                            {section.src && (
-                              <div className="mb-4">
-                                <ImageLightbox
-                                  width={800}
-                                  height={600}
-                                  src={section.src}
-                                  alt="Main image"
-                                  className="w-full h-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                                />
-                              </div>
-                            )}
-                            {/* Additional images label */}
-                            {section.imageDetail &&
-                              section.imageDetail.length > 0 && (
-                                <div className="space-y-2">
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                                    Additional Images (
-                                    {(() => {
-                                      const existingImages =
-                                        section.imageDetail.filter(
-                                          (url) => url && url.trim() !== ""
-                                        ).length;
-                                      const newImages =
-                                        contentSectionImageFiles[index]?.filter(
-                                          (file) => file !== null
-                                        ).length || 0;
-                                      return existingImages + newImages;
-                                    })()}
-                                    ):
-                                  </p>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                    {(() => {
-                                      // Get existing images
-                                      const existingImages = section.imageDetail
-                                        .filter(
-                                          (url) => url && url.trim() !== ""
-                                        )
-                                        .map((imageUrl, idx) => {
-                                          const previewUrl =
-                                            contentSectionImagePreviews[
-                                              index
-                                            ]?.[idx];
-                                          const displayUrl =
-                                            previewUrl || imageUrl;
-                                          return {
-                                            url: displayUrl,
-                                            index: idx,
-                                            isNew: false,
-                                          };
-                                        });
-
-                                      // Get new uploaded images
-                                      const newImages =
-                                        contentSectionImageFiles[index]
-                                          ?.map((file, idx) => {
-                                            if (file) {
-                                              const previewUrl =
-                                                contentSectionImagePreviews[
-                                                  index
-                                                ]?.[idx];
-                                              if (previewUrl) {
-                                                return {
-                                                  url: previewUrl,
-                                                  index:
-                                                    existingImages.length + idx,
-                                                  isNew: true,
-                                                };
-                                              }
-                                            }
-                                            return null;
-                                          })
-                                          .filter(Boolean) || [];
-
-                                      // Combine and display all images
-                                      const allImages = [
-                                        ...existingImages,
-                                        ...newImages,
-                                      ];
-
-                                      return allImages.map((image, idx) => {
-                                        if (!image) return null;
-                                        return (
-                                          <div
-                                            key={`${
-                                              image.isNew ? "new" : "existing"
-                                            }-${image.index}`}
-                                            className="relative cursor-pointer"
-                                            onClick={() => {
-                                              setGalleryImages(
-                                                allImages
-                                                  .filter((img) => img !== null)
-                                                  .map((img) => img!.url)
-                                              );
-                                              setCurrentImageIndex(idx);
-                                              setShowGallery(true);
-                                            }}
-                                          >
-                                            <ImageLightbox
-                                              width={400}
-                                              height={300}
-                                              src={image.url}
-                                              alt={`Additional image ${
-                                                image.index + 1
-                                              }`}
-                                              className="w-full h-auto rounded-lg shadow-md hover:shadow-lg transition-shadow"
-                                            />
-                                            <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                                              {image.index + 1}
-                                            </div>
-                                          </div>
-                                        );
-                                      });
-                                    })()}
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                Images ({imageUrls.length}):
+                              </p>
+                              <div className="grid grid-cols-3 gap-2">
+                                {imageUrls.map((imageUrl, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="relative rounded-lg overflow-hidden cursor-pointer"
+                                    onClick={() => {
+                                      setCurrentImageIndex((prev) => ({
+                                        ...prev,
+                                        [index]: idx,
+                                      }));
+                                      setShowGallery((prev) => ({
+                                        ...prev,
+                                        [index]: true,
+                                      }));
+                                    }}
+                                  >
+                                    {/* Order number badge */}
+                                    <span className="absolute top-2 left-2 z-10 bg-black bg-opacity-60 text-white text-xs font-bold px-2 py-0.5 rounded">
+                                      {idx + 1}
+                                    </span>
+                                    <Image
+                                      src={imageUrl}
+                                      alt={`Detail Image ${idx + 1}`}
+                                      width={400}
+                                      height={300}
+                                      className="w-full h-[200px] object-cover hover:scale-105 transition-transform duration-200"
+                                    />
                                   </div>
-                                </div>
-                              )}
+                                ))}
+                              </div>
+                              <ImageLightbox
+                                images={imageUrls}
+                                currentIndex={currentImageIndex[index] || 0}
+                                open={showGallery[index] || false}
+                                onClose={() => {
+                                  setShowGallery((prev) => ({
+                                    ...prev,
+                                    [index]: false,
+                                  }));
+                                }}
+                              />
+                            </div>
                           </div>
                         );
                       }
@@ -1390,31 +1299,6 @@ const AdminUpdatePostPage: React.FC = () => {
         </Dialog>
       )}
 
-      {/* Image Lightbox Gallery */}
-      {showGallery && (
-        <Lightbox
-          open={showGallery}
-          close={() => setShowGallery(false)}
-          slides={galleryImages.map((src) => ({
-            src,
-            width: 1920,
-            height: 1080,
-          }))}
-          index={currentImageIndex}
-          plugins={[Zoom]}
-          zoom={{
-            maxZoomPixelRatio: 3,
-            scrollToZoom: true,
-            doubleClickMaxStops: 2,
-            doubleClickDelay: 300,
-          }}
-          carousel={{ finite: true }}
-          styles={{
-            container: { backgroundColor: "rgba(0, 0, 0, 0.9)" },
-            root: { "--yarl__color_backdrop": "rgba(0, 0, 0, 0.9)" },
-          }}
-        />
-      )}
     </>
   );
 };
